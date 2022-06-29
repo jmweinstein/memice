@@ -1,11 +1,24 @@
 Package: memice
 Type: Package
-Title: What the Package Does (Title Case)
+Title: A Package for Estimating Marginal Effects Using Data Multiply Imputed by Chained Equations
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Joshua Weinstein (ORCID: 0000-0001-6917-4189) <weinsteinjoshm@gmail.com>
+Maintainer: Joshua Weinstein <weinsteinjoshm@gmail.com>
+Description: Provides several functions to estimate marginal effects using data objects created via multiple imputation using the mice package (.mids objects). Currently compatible with linear models (lm() objects) and generalized linear models (glm() objects). Pools marginal effects estimates according to Rubin's Rules.  
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.2.0
+Imports: 
+  dplyr,
+  marginaleffects,
+  mice,
+  tibble,
+  data.table,
+  missMethods,
+  qdapRegex
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+URL: https://github.com/jmweinstein/memice
+BugReports: https://github.com/jmweinstein/memice/issues

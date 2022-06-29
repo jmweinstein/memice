@@ -1,0 +1,77 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "/man/figures/",
+  out.width = "100%",
+  warning = FALSE
+)
+```
+
+# memice
+
+<img src="https://github.com/jmweinstein/hex/blob/main/memice_hexsticker.png?raw=true" align="right" width="162"/>
+
+`memice` is a package with several functions to facilitate the estimation of marginal effects in linear and generalized linear models. It takes a model object (`lm()` or `glm()` objects) and a `.mids` object (a data object containing data multiply imputed by `mice::mice()`), estimates the marginal effects in each dataset within the `.mids` object, and pools the marginal effect estimates according to Rubin's Rules. This package takes inspiration from Daniel Klein's mimrgns program for Stata.
+
+## Installation
+
+You can install the development version of memice like so:
+
+``` r
+devtools::install_github("jmweinstein/memice")
+```
+
+## Recommended workflow
+
+The recommended workflow for using all `memice` functions is:
+
+1.  Create your desired model with the dataset that contains missing data
+2.  Use `mice::mice()` to impute data via chained equations and save to an object
+3.  Call `memice::initialize_memice()` to initialize your workspace for using memice (this adds formatting functions to your workspace, which are necessary for `memice` properly handling different variable types)
+4.  Use one of the `memice` functions, feeding in your model from Step 1 and your `.mids` object (from `mice::mice()`) from Step 2
+
+Model estimation is done prior to the use of `memice` functions to ensure that all quirks with models have been figured out before being fed into any of the `memice` functions. Things that may cause issues with `memice` functions pooling marginal effects estimates include non-convergence of generalized linear models or improperly-formatted variables (numbers that should be factors, factors that should be numeric, etc.)- by estimating the model before using the `memice` functions, the user has the opportunity to identify and remedy these issues beforehand.
+
+## Example usage of `memice::ame_mice()`
+
+The function `memice::ame_mice()` estimates average marginal effects (AME) in multiply imputed data created by `mice::mice()`.
+
+```{r example_1.1}
+library(memice)
+library(missMethods)
+
+
+## Create dataset with artificially-induced missingness in 'cyl' variable
+data_with_missings <- mtcars |>
+  missMethods::delete_MCAR(0.3, "cyl") |>
+  dplyr::mutate(cyl = as.factor(cyl))
+```
+
+Create your desired model with the dataset that contains missing data
+
+```{r example_1.2}
+lm_mod <- lm(formula = mpg ~ wt + hp + cyl + cyl*wt + disp,
+             data = data_with_missings)
+```
+
+Create `.mids` object of imputed data using `mice::mice()`
+
+```{r example_1.3}
+imputation <- mice::mice(data = data_with_missings, m = 5, seed = 01701)
+```
+
+Initialize `memice` using `initialize_memice`, then estimate and pool marginal effects across the imputed datasets
+```{r example_1.4}
+memice::initialize_memice()
+pooled_mfx <- memice::ame_mice(model = lm_mod, mice_object = imputation)
+pooled_mfx
+```
+
+## Acknowledgements
+
+I thank both Dr. Vincent Arel-Bundock and Dr. Noah Greifer for their technical assistance in developing this package. This package takes inspiration from Daniel Klein's mimrgns program for Stata.
